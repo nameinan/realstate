@@ -1,0 +1,64 @@
+﻿
+@model mongohome.ui.Rental.RentalList
+@{
+    ViewBag.Title = "Rental Listing";
+    Layout = null;
+}
+
+<h2>Rental Listing</h2>
+
+
+@using ( Html.BeginForm())
+{
+    <label for="PriceLimit"> Price Limit</label>
+    <input type ="text"   name ="PriceLimit" value ="@Model.Filters.PriceLimit"/>
+    <input type="submit" value ="Search"/>
+
+}
+
+
+
+
+
+
+<p>
+    @Html.ActionLink("Post Rental", "Post")
+</p>
+
+<table  class="table">
+    
+    <th>Description</th>
+    <th>No of Rooms</th>
+    <th>Address</th>
+    <th>Price</th>
+    
+    
+    @foreach (var rental in Model.Rentals)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => rental.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => rental.NoOfRooms)
+            </td>
+            <td>
+                @string.Join(" ", rental.Address)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => rental.Price)
+            </td>
+            <td>
+                @rental.Adjustments.Select(a=>a.Describe()).LastOrDefault()
+            </td>
+            <td>
+                @Html.ActionLink("Adjust Price","AdjustPrice",new { Id= rental.Id})
+            </td>
+    
+        </tr>
+    }
+
+    
+</table>
+
+
