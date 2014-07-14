@@ -106,5 +106,11 @@ namespace mongohome.ui.Controllers
         {
             return RedirectToAction("Index");
         }
+
+        public ActionResult Delete(string id)
+        {
+            Context.Rentals.Remove(Query.EQ("_id", new ObjectId(id)));
+            return RedirectToAction("Index");
+        }
     }
 }

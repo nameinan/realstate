@@ -52,6 +52,9 @@
             <td>
                 @Html.ActionLink("Adjust Price", "AdjustPrice", new {rental.Id})
             </td>
+            <td>
+                @Html.ActionLink("Delete", "Delete", new { rental.Id })
+            </td>
     
         </tr>
     }
