@@ -1,5 +1,6 @@
 ﻿
-@model mongohome.ui.Rental.RentalList
+@using mongohome.ui.Rental
+@model RentalList
 @{
     ViewBag.Title = "Rental Listing";
     Layout = null;
@@ -8,17 +9,14 @@
 <h2>Rental Listing</h2>
 
 
-@using ( Html.BeginForm())
+@using (Html.BeginForm())
 {
     <label for="PriceLimit"> Price Limit</label>
     <input type ="text"   name ="PriceLimit" value ="@Model.Filters.PriceLimit"/>
+    <label for="PriceLimit"> Minimum room Limit</label>
+    <input type ="text"   name ="MinRoom" value ="@Model.Filters.MinRoom"/>
     <input type="submit" value ="Search"/>
-
 }
-
-
-
-
 
 
 <p>
@@ -33,7 +31,7 @@
     <th>Price</th>
     
     
-    @foreach (var rental in Model.Rentals)
+    @foreach (Rental rental in Model.Rentals)
     {
         <tr>
             <td>
@@ -49,10 +47,10 @@
                 @Html.DisplayFor(modelItem => rental.Price)
             </td>
             <td>
-                @rental.Adjustments.Select(a=>a.Describe()).LastOrDefault()
+                @rental.Adjustments.Select(a => a.Describe()).LastOrDefault()
             </td>
             <td>
-                @Html.ActionLink("Adjust Price","AdjustPrice",new { Id= rental.Id})
+                @Html.ActionLink("Adjust Price", "AdjustPrice", new {rental.Id})
             </td>
     
         </tr>

@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
+using MongoDB.Driver.Linq;
 using mongohome.ui.Models;
 using mongohome.ui.Rental;
 
@@ -14,32 +12,57 @@ namespace mongohome.ui.Controllers
 {
     public class RentalController : Controller
     {
-        
+        private readonly RealStateContext Context = new RealStateContext();
 
-        RealStateContext Context=new RealStateContext();
-        public ActionResult Index( RentalsFilter filter)
+        public ActionResult Index(RentalsFilter filter)
         {
+            /*
             var rentals = FilteRentals(filter)
                 .SetSortOrder(SortBy<Rental.Rental>.Ascending(r=>r.Price));
+
+            */
+
+            IEnumerable<Rental.Rental> rentals = FilteRentals(filter);
+
+
             var rentalList = new RentalList
             {
-               Filters = filter,
-               Rentals= rentals
-              
-            
+                Filters = filter,
+                Rentals = rentals
             };
             return View(rentalList);
         }
 
-        private MongoCursor<Rental.Rental> FilteRentals(RentalsFilter filter)
+        private IEnumerable<Rental.Rental> FilteRentals(RentalsFilter filter)
         {
-            if (!filter.PriceLimit.HasValue)
+            //private MongoCursor<Rental.Rental> FilteRentals(RentalsFilter filter)
+            //
+            /*    if (!filter.PriceLimit.HasValue)
             {
                 return Context.Rentals.FindAll();
             }
             IMongoQuery query = Query<Rental.Rental>.LTE(r => r.Price,filter.PriceLimit);
-            return Context.Rentals.Find(query);
+            return Context.Rentals.Find(query);*/
+
+
+            IQueryable<Rental.Rental> rentals = Context.Rentals.AsQueryable().OrderBy(r => r.Price);
+
+            if (filter.MinRoom.HasValue)
+            {
+                rentals = rentals.Where(r => r.NoOfRooms >= filter.MinRoom);
+            }
+
+
+            if (filter.PriceLimit.HasValue)
+            {
+                IMongoQuery query = Query<Rental.Rental>.LTE(r => r.Price, filter.PriceLimit);
+                rentals = rentals.Where(r => query.Inject());
+            }
+
+
+            return rentals;
         }
+
 
         public ActionResult Post()
         {
@@ -55,19 +78,18 @@ namespace mongohome.ui.Controllers
             return RedirectToAction("Index");
         }
 
-        
+
         public ActionResult AdjustPrice(string id)
         {
-            var rental = GetRental(id);
+            Rental.Rental rental = GetRental(id);
             return View(rental);
         }
 
-        
 
         [HttpPost]
         public ActionResult AdjustPrice(string id, AdjustPrice adjustPrice)
         {
-            var rental = GetRental(id);
+            Rental.Rental rental = GetRental(id);
             rental.AdjustPrice(adjustPrice);
             Context.Rentals.Save(rental);
             return RedirectToAction("Index");
@@ -76,8 +98,8 @@ namespace mongohome.ui.Controllers
 
         private Rental.Rental GetRental(string id)
         {
-            var rental = Context.Rentals.FindOneById(new ObjectId(id));
-           return rental;
+            Rental.Rental rental = Context.Rentals.FindOneById(new ObjectId(id));
+            return rental;
         }
 
         public ActionResult Cancel()
