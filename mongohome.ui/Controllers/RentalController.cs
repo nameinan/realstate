@@ -79,5 +79,10 @@ namespace mongohome.ui.Controllers
             var rental = Context.Rentals.FindOneById(new ObjectId(id));
            return rental;
         }
+
+        public ActionResult Cancel()
+        {
+            return RedirectToAction("Index");
+        }
     }
 }
